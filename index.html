@@ -46,15 +46,19 @@ G, C | D - Em
 PWC(B/8)</textarea>
     </div>
     <div>
-      <label>Translated</label>
-      <div class="out" id="out"></div>
+      <label for="outText">Translated (ready to copy)</label>
+      <textarea id="outText" readonly spellcheck="false" style="min-height:150px"></textarea>
+      <details style="margin-top:8px"><summary style="cursor:pointer;color:var(--mute);font-size:.85rem">Preview with problems highlighted</summary><div class="out" id="out"></div></details>
     </div>
   </div>
   <div class="row" style="margin-top:12px">
     <div><label for="capo">Capo (adds to every chord's frets)</label><input type="number" id="capo" min="0" max="20" placeholder="—"></div>
     <label style="margin:0;text-transform:none;letter-spacing:0;display:flex;gap:6px;align-items:center"><input type="checkbox" id="hdr" checked style="width:auto"> Add a header if my text has none</label>
     <div><label for="hmode">Header type</label><select id="hmode" style="background:#0f1114;color:var(--text);border:1px solid var(--line);border-radius:8px;padding:10px;font:15px system-ui"><option value="std">Standard (default)</option><option value="full">Full dictionary</option></select></div>
-    <button id="copy">Copy result</button>
+    <label style="margin:0;text-transform:none;letter-spacing:0;display:flex;gap:6px;align-items:center"><input type="checkbox" id="autocopy" checked style="width:auto"> Auto-copy when I paste</label>
+    <button id="pastebtn">Paste, translate &amp; copy</button>
+    <button id="copy" class="ghost">Copy result</button>
+    <button id="clear" class="ghost">Clear</button>
   </div>
   <div class="msg" id="status"></div>
 </div>
@@ -245,6 +249,7 @@ function render(){
   }
   const rows=translate(input,map,capo);
   window._last=plain(rows);
+  const ot=document.getElementById('outText');ot.value=window._last;ot.style.height='auto';ot.style.height=Math.min(ot.scrollHeight+4,600)+'px';
   let bad=0;
   document.getElementById('out').innerHTML=rows.map(r=>{
     if(r.length&&r[0].kind==='raw') return esc(r[0].text);
@@ -271,9 +276,23 @@ function runTests(){
 }
 ['inp','rules','capo','hdr','hmode'].forEach(id=>document.getElementById(id).addEventListener('input',render));
 document.getElementById('runtests').onclick=runTests;
-document.getElementById('copy').onclick=async()=>{
-  try{await navigator.clipboard.writeText(window._last||'');document.getElementById('status').className='msg ok';document.getElementById('status').textContent='Copied.'}catch(e){document.getElementById('status').className='msg bad';document.getElementById('status').textContent='Copy blocked — select the text manually.'}
+async function copyOut(msg){
+  const st=document.getElementById('status');
+  try{await navigator.clipboard.writeText(window._last||'');st.className='msg ok';st.textContent=msg;}
+  catch(e){const o=document.getElementById('outText');o.focus();o.select();st.className='msg bad';st.textContent='Browser blocked auto-copy. The result is selected: press Ctrl+C.';}
+}
+document.getElementById('copy').onclick=()=>copyOut('Copied.');
+document.getElementById('outText').addEventListener('click',e=>e.target.select());
+document.getElementById('clear').onclick=()=>{document.getElementById('inp').value='';render();document.getElementById('inp').focus();};
+document.getElementById('pastebtn').onclick=async()=>{
+  const st=document.getElementById('status');
+  try{const t=await navigator.clipboard.readText();document.getElementById('inp').value=t;render();await copyOut('Translated and copied.');}
+  catch(e){st.className='msg bad';st.textContent='Browser blocked reading your clipboard. Click the left box and press Ctrl+V instead.';}
 };
+document.getElementById('inp').addEventListener('paste',()=>{
+  if(!document.getElementById('autocopy').checked)return;
+  setTimeout(()=>{render();copyOut('Translated and copied.');},0);
+});
 render();runTests();renderShapes();
 </script>
 </body>

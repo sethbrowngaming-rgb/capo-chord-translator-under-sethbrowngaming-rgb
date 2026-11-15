@@ -115,6 +115,14 @@ These four barre shapes, plus PWC, are the only chords in this system. A custom 
 
 PWC (power chord) diagram coming soon.
 
+## Quick use
+
+1. Copy your note.
+2. Click **Paste, translate & copy**. (Or click the left box, press Ctrl+V, and it translates and copies automatically.)
+3. Paste the result wherever you want it.
+
+The translated note is a plain-text box, so the formatting copies exactly. If your browser blocks clipboard access, the result gets selected for you: press Ctrl+C.
+
 ## How the tool treats your text
 
 - Chord lines (for example `Dm,A,Em,G`) are translated. Chords can be separated by spaces, commas, `|` or dashes.
