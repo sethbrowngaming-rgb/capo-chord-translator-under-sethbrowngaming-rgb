@@ -68,6 +68,18 @@ An `X` with a number (`X2`, `x3`, or `2X`) means repeat. It stays exactly as wri
 
 `A7` and `E7` are not translated. They stay exactly as written, and the capo does not change them. This is a line in the rules box: `KEEP A7 E7`. Add more chords to that line to leave them alone too.
 
+### Shapes written with "On"
+
+A shape can also be written with `On` (any capitalization: `On`, `ON`, `on`), like `FOn2`, `bON5` or `F#on3`. The `On` is dropped and the number is used as the fret: `FOn2` is read as `F2`, `F#on3` as `F#3`. If there is **no number** (`FOn`, `BmOn`), the fret is **0**, not the default above. The capo is added as usual.
+
+| Written | Capo 0 | Capo 4 |
+|---------|--------|--------|
+| `FON2` | `F2` | `F6` |
+| `bOn2` | `B2` | `B6` |
+| `BmOn5` | `Bm5` | `Bm9` |
+| `FOn` | `F0` | `F4` |
+| `F` (no On) | `F1` | `F5` |
+
 The rules are editable in the page. Add your own lines in the same `CHORD=SHAPE+FRETS` format.
 
 ## PWC (power chord) notation

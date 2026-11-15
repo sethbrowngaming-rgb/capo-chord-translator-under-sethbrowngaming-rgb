@@ -186,6 +186,8 @@ function lookup(tok,map){
 }
 function resolve(tok,map){
   const h=lookup(tok,map); if(h) return h.rule;
+  const on=tok.match(/^(F#|F|Bm|B)on(\d*)$/i); // FOn2, bON5, F#on (no number = 0): drop the On
+  if(on){const sh=on[1].toLowerCase()==='bm'?'Bm':on[1].toUpperCase();return {shape:sh,plus:on[2]===''?0:parseInt(on[2],10)};}
   const m=tok.match(/^(F#|F|Bm|B)(\d+)$/i); // shape + fret, e.g. F3, Bm5
   if(m){const sh=m[1].toLowerCase()==='bm'?'Bm':m[1].toUpperCase();return {shape:sh,plus:parseInt(m[2],10)};}
   return null;
