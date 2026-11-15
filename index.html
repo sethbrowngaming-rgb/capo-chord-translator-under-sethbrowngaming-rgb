@@ -21,7 +21,7 @@
   .chip small{color:var(--mute);font-size:.7em;margin-left:4px}
   .chip.pwc{color:#7fc4ff}
   .chip.bad{color:var(--bad);border-color:var(--bad)}
-  .chip.raw{color:var(--text)}
+  .chip.raw,.chip.keep{color:var(--text)}
   .row{display:flex;gap:12px;align-items:end;flex-wrap:wrap}
   button{background:var(--acc);color:#14161a;border:0;border-radius:8px;padding:9px 14px;font-weight:600;cursor:pointer}
   button.ghost{background:transparent;color:var(--text);border:1px solid var(--line)}
@@ -64,7 +64,7 @@ PWC(B/8)</textarea>
 </div>
 
 <div class="card">
-  <label for="rules">Your rules (edit or add lines — format: CHORD=SHAPE+FRETS)</label>
+  <label for="rules">Your rules (edit or add lines — format: CHORD=SHAPE+FRETS, or KEEP A7 E7 to leave chords unchanged)</label>
   <textarea id="rules" spellcheck="false">G=F+3
 C=B+3
 D=B+5
@@ -78,7 +78,8 @@ F#m=F#+1
 Bm=Bm+2
 B=B+2
 F=F+1
-F#=F#+1</textarea>
+F#=F#+1
+KEEP A7 E7</textarea>
   <div class="msg" id="rulemsg"></div>
   <div class="msg" style="color:var(--mute)">PWC(shape/fret): shape must be F, F# or B. PWC tokens are passed through and checked, since no conversion rule was given for them.</div>
 </div>
@@ -163,9 +164,12 @@ Chorus
 Outro`;
 const PWC_SHAPES=['F','F#','B'];
 function parseRules(text){
-  const map={},errs=[];
+  const map={},errs=[],keep=new Set();
+  Object.defineProperty(map,'__keep',{value:keep});
   text.split(/\r?\n/).forEach((l,i)=>{
     l=l.trim(); if(!l) return;
+    const k=l.match(/^KEEP\s+(.+)$/i);
+    if(k){k[1].split(/[\s,]+/).filter(Boolean).forEach(t=>keep.add(t.toUpperCase()));return;}
     const m=l.match(/^([A-Za-z#]+)\s*=\s*([A-Za-z#]+)\s*\+\s*(\d+)$/);
     if(!m){errs.push('Line '+(i+1)+': "'+l+'" not understood');return;}
     map[m[1]]={shape:m[2],plus:parseInt(m[3],10)};
@@ -192,6 +196,7 @@ function translateToken(tok,map,capo){
     const ok=PWC_SHAPES.includes(shape);
     return {kind:ok?'pwc':'bad',text:ok?`PWC(${shape}/${p[2]})`:`PWC(${p[1]}/${p[2]})`,note:ok?'':'shape must be F, F# or B'};
   }
+  if(map.__keep&&map.__keep.has(tok.toUpperCase())) return {kind:'keep',text:tok,note:''};
   const rule=resolve(tok,map);
   if(!rule) return {kind:'bad',text:tok,note:'no rule'};
   const {shape,plus}=rule;
@@ -204,7 +209,7 @@ function translate(text,map,capo){
   return text.split(/\r?\n/).map(line=>{
     const parts=line.split(/(PWC\([^)]*\)|[\s,|\-]+)/i).filter(s=>s!==''&&s!==undefined);
     const words=parts.filter(s=>!/^[\s,|\-]+$/.test(s));
-    const isChordLine=words.length>0&&words.every(w=>PWCRE.test(w)||resolve(w,map)||CHORDLIKE.test(w));
+    const isChordLine=words.length>0&&words.every(w=>PWCRE.test(w)||resolve(w,map)||(map.__keep&&map.__keep.has(w.toUpperCase()))||CHORDLIKE.test(w));
     if(!isChordLine) return [{kind:'raw',text:line}];
     return parts.map(s=>/^[\s,|\-]+$/.test(s)?{kind:'sep',text:s}:translateToken(s,map,capo));
   });
@@ -276,7 +281,7 @@ function render(){
   st.className='msg '+(bad?'bad':'ok');
   st.textContent=bad?bad+' item(s) could not be translated (red).':info;
 }
-const ORIGINAL={G:'F+3',C:'B+3',D:'B+5',Dm:'Bm+5',E:'F+0',Em:'F#+0',Am:'Bm+0',A:'B+0',Gm:'F+3',"F#m":'F#+1',Bm:'Bm+2',B:'B+2',F:'F+1',"F#":'F#+1'};
+const ORIGINAL={G:'F+3',C:'B+3',D:'B+5',Dm:'Bm+5',E:'F+0',Em:'F#+0',Am:'Bm+0',A:'B+0',Gm:'F+3',"F#m":'F#+1',Bm:'Bm+2',B:'B+2',F:'F+1',"F#":'F#+1',A7:'A7',E7:'E7'};
 function runTests(){
   const {map}=parseRules(document.getElementById('rules').value);
   const t=document.getElementById('tests');

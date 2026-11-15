@@ -47,6 +47,10 @@ A shape written without a number gets a default fret (capo 0):
 
 A shape written with a number is used as is, so `F3` is F at fret 3 and `Bm5` is Bm at fret 5. The capo is added to every number, so with Capo 4 `Bm` becomes `Bm6` and `F3` becomes `F7`.
 
+### Chords left alone
+
+`A7` and `E7` are not translated. They stay exactly as written, and the capo does not change them. This is a line in the rules box: `KEEP A7 E7`. Add more chords to that line to leave them alone too.
+
 The rules are editable in the page. Add your own lines in the same `CHORD=SHAPE+FRETS` format.
 
 ## PWC (power chord) notation
