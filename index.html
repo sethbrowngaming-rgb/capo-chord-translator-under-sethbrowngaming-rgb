@@ -268,7 +268,7 @@ function render(){
     input=(full?HEADER_FULL:HEADER)(capo===null?0:capo)+'\n\n'+input;
   }
   const rows=translate(input,map,capo);
-  window._last=plain(rows);
+  window._last=plain(rows).replace(/^(\s*Capo:\s*)\d+/im,(m,a)=>a+'0'); // capo is already added into the frets
   const ot=document.getElementById('outText');ot.value=window._last;ot.style.height='auto';ot.style.height=Math.min(ot.scrollHeight+4,600)+'px';
   let bad=0;
   document.getElementById('out').innerHTML=rows.map(r=>{
