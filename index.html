@@ -199,7 +199,8 @@ function plain(rows){return rows.map(r=>r.length&&r[0].kind==='raw'?r[0].text:r.
 // ---- chord shape diagrams ----
 // rel = fret of each string (6 -> 1) relative to the bar fret; fin = finger used
 const SHAPES={
-  F:{rel:[0,2,2,1,0,0],fin:[1,3,4,2,1,1],barLabel:[0,4,5]}
+  F:{rel:[0,2,2,1,0,0],fin:[1,3,4,2,1,1],barLabel:[0,4,5]},
+  'F#':{rel:[0,2,2,0,0,0],fin:[1,3,4,1,1,1],barLabel:[0,3,4,5]}
 };
 function shapeSVG(name,N){
   const sh=SHAPES[name],X0=30,DX=18,Y0=38,DY=28,start=N===0?1:N;
@@ -221,7 +222,7 @@ function shapeSVG(name,N){
 }
 function renderShapes(){
   const el=document.getElementById('shapes');
-  const items=[['F',1,'F1 — bar at fret 1'],['F',3,'F3 — bar at fret 3'],['F',0,'F0 — no bar (+0)']];
+  const items=[['F',1,'F1 — bar at fret 1'],['F',3,'F3 — bar at fret 3'],['F',0,'F0 — no bar (+0)'],['F#',1,'F#1 — bar at fret 1'],['F#',3,'F#3 — bar at fret 3'],['F#',0,'F#0 — no bar (+0)']];
   el.innerHTML=items.map(([n,N,t])=>`<div style="text-align:center;font-size:.8rem;color:var(--mute)">${shapeSVG(n,N)}<div>${t}</div></div>`).join('');
 }
 function render(){

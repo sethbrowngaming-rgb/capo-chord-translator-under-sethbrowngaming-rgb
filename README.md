@@ -113,11 +113,26 @@ Strings are listed 6 to 1 (left to right on the diagram). The page draws these d
 | Fret vs. bar | +0 | +2 | +2 | +1 | +0 | +0 |
 | Finger | 1 | 3 | 4 | 2 | 1 | 1 |
 
-The number after the shape is the fret the bar sits on: `F1` = bar at fret 1, `F3` = bar at fret 3, and so on.
+**Number rule (all shapes):** the number after the shape is the fret the bar sits on: `F1` = bar at fret 1, `F3` = bar at fret 3, and so on.
 
 **Zero rule:** when the number is 0 (a +0 rule), remove the bar (finger 1) and play only the remaining notes: strings 6, 2 and 1 are open, finger 2 stays on string 3, fingers 3 and 4 stay on strings 5 and 4.
 
-More shapes (F#, B, Bm, PWC) will be added here.
+### F# shape (barre)
+
+```
+ 6 5 4 3 2 1   (strings)
+ 1-----1 1 1   finger 1 = bar across all strings
+   3 4         fingers 3 and 4 = strings 5 and 4, two frets above the bar
+```
+
+| String | 6 | 5 | 4 | 3 | 2 | 1 |
+|--------|---|---|---|---|---|---|
+| Fret vs. bar | +0 | +2 | +2 | +0 | +0 | +0 |
+| Finger | 1 | 3 | 4 | 1 | 1 | 1 |
+
+Same number rule as F: `F#1` = bar at fret 1, `F#3` = bar at fret 3. At 0 (`F#0`) the bar comes off: strings 6, 3, 2 and 1 are open and fingers 3 and 4 stay on strings 5 and 4.
+
+More shapes (B, Bm, PWC) will be added here.
 
 ## How the tool treats your text
 
