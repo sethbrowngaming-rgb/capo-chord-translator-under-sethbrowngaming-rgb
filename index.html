@@ -65,7 +65,7 @@ PWC(B/8)</textarea>
 </div>
 
 <div class="card">
-  <label for="rules">Your rules (edit or add lines — format: CHORD=SHAPE+FRETS, or KEEP A7 E7 to leave chords unchanged)</label>
+  <label for="rules">Your rules (edit or add lines — format: CHORD=SHAPE+FRETS, or KEEP D7 to leave a chord unchanged)</label>
   <textarea id="rules" spellcheck="false">G=F+3
 C=B+3
 D=B+5
@@ -81,7 +81,8 @@ B=B+2
 F=F+1
 F#=F#+1
 Am7=Bm+0
-KEEP A7 E7</textarea>
+A7=B+0
+E7=F+0</textarea>
   <div class="msg" id="rulemsg"></div>
   <div class="msg" style="color:var(--mute)">PWC(shape/fret): shape must be F, F# or B. PWC tokens are passed through and checked, since no conversion rule was given for them.</div>
 </div>
@@ -290,7 +291,7 @@ function render(){
   st.className='msg '+(bad?'bad':'ok');
   st.textContent=bad?bad+' item(s) could not be translated (red).':info;
 }
-const ORIGINAL={G:'F+3',C:'B+3',D:'B+5',Dm:'Bm+5',E:'F+0',Em:'F#+0',Am:'Bm+0',A:'B+0',Gm:'F+3',"F#m":'F#+1',Bm:'Bm+2',B:'B+2',F:'F+1',"F#":'F#+1',A7:'A7',E7:'E7',Am7:'Bm+0'};
+const ORIGINAL={G:'F+3',C:'B+3',D:'B+5',Dm:'Bm+5',E:'F+0',Em:'F#+0',Am:'Bm+0',A:'B+0',Gm:'F+3',"F#m":'F#+1',Bm:'Bm+2',B:'B+2',F:'F+1',"F#":'F#+1',A7:'B+0',E7:'F+0',Am7:'Bm+0'};
 function runTests(){
   const {map}=parseRules(document.getElementById('rules').value);
   const t=document.getElementById('tests');

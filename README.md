@@ -34,6 +34,8 @@ Example, capo 4: `D = B+5` becomes **B9**. `Em = F#+0` becomes **F#4**. `G = F+3
 | Gm | F+3  | F7  |
 | F#m | F#+1 | F#5 |
 | Am7 | Bm+0 | Bm4 (same as Am) |
+| A7 | B+0 | B4 (same as A) |
+| E7 | F+0 | F4 (same as E) |
 
 ### Shapes with no number, and shapes with a number
 
@@ -65,21 +67,9 @@ The capo is already added into the translated frets, so the `Capo:` line in the 
 
 An `X` with a number (`X2`, `x3`, or `2X`) means repeat. It stays exactly as written and the chords on the same line still translate: `Am,D,G,Em,X2` with Capo 4 becomes `Bm4, B9, F7, F#4, X2`.
 
-### Chords left alone
+### Chords left alone (optional)
 
-`A7` and `E7` are not translated. They stay exactly as written, and the capo does not change them. This is a line in the rules box: `KEEP A7 E7`. Add more chords to that line to leave them alone too.
-
-### Shapes written with "On"
-
-A shape can also be written with `On` (any capitalization: `On`, `ON`, `on`), like `FOn2`, `bON5` or `F#on3`. The `On` is dropped and the number is used as the fret: `FOn2` is read as `F2`, `F#on3` as `F#3`. If there is **no number** (`FOn`, `BmOn`), the fret is **0**, not the default above. The capo is added as usual.
-
-| Written | Capo 0 | Capo 4 |
-|---------|--------|--------|
-| `FON2` | `F2` | `F6` |
-| `bOn2` | `B2` | `B6` |
-| `BmOn5` | `Bm5` | `Bm9` |
-| `FOn` | `F0` | `F4` |
-| `F` (no On) | `F1` | `F5` |
+Any chord can be left exactly as written (the capo does not change it) by adding a `KEEP` line to the rules box, for example `KEEP D7`. No chords are kept by default.
 
 The rules are editable in the page. Add your own lines in the same `CHORD=SHAPE+FRETS` format.
 
