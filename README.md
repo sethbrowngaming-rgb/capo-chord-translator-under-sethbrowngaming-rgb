@@ -47,6 +47,15 @@ A shape written without a number gets a default fret (capo 0):
 
 A shape written with a number is used as is, so `F3` is F at fret 3 and `Bm5` is Bm at fret 5. The capo is added to every number, so with Capo 4 `Bm` becomes `Bm6` and `F3` becomes `F7`.
 
+A repeat marker can also be attached to a chord with an underscore, or stand alone with no number:
+
+| Written | Result (Capo 4) |
+|---------|-----------------|
+| `Am_X2` | `Bm4_X2` |
+| `D_X` | `B9_X` |
+| `_X2` | `_X2` |
+| `X` | `X` |
+
 ### Capo line in the result
 
 The capo is already added into the translated frets, so the `Capo:` line in the result is changed to `Capo: 0`. Other text on that line (like `Gain: 2`) is kept. This also means you can paste a translated note back in without the capo being added twice.

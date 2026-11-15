@@ -191,6 +191,8 @@ function resolve(tok,map){
   return null;
 }
 function translateToken(tok,map,capo){
+  const att=tok.match(/^(.+?)(_(?:[Xx]\d*|\d+[Xx]))$/);
+  if(att){const r=translateToken(att[1],map,capo);return {...r,text:r.text+att[2]};}
   const p=tok.match(/^PWC\(\s*([A-Za-z#]+)\s*\/\s*(\d+)\s*\)$/i);
   if(p){
     const shape=p[1].length>1?p[1][0].toUpperCase()+p[1].slice(1):p[1].toUpperCase();
@@ -206,13 +208,14 @@ function translateToken(tok,map,capo){
   return {kind:'ok',text:`${shape}${plus}`,note:''};
 }
 const CHORDLIKE=/^[A-Ga-g][#b]?(m|min|maj|M)?\d*(sus\d?|dim|aug)?$/;
-const REPEATRE=/^(?:[Xx]\d*|\d+[Xx])$/; // X2, x3, 2X = repeat markers, left as written
+const REPEATRE=/^_?(?:[Xx]\d*|\d+[Xx])$/;
+const REPSUFFIX=/_(?:[Xx]\d*|\d+[Xx])$/; // chord with repeat attached: Am_X2, D_X // X2, x3, 2X = repeat markers, left as written
 const PWCRE=/^PWC\([^)]*\)$/i;
 function translate(text,map,capo){
   return text.split(/\r?\n/).map(line=>{
-    const parts=line.split(/(PWC\([^)]*\)|[\s,|\-]+)/i).filter(s=>s!==''&&s!==undefined);
+    const parts=line.split(/(PWC\([^)]*\)(?:_(?:[Xx]\d*|\d+[Xx]))?|[\s,|\-]+)/i).filter(s=>s!==''&&s!==undefined);
     const words=parts.filter(s=>!/^[\s,|\-]+$/.test(s));
-    const isChordLine=words.length>0&&words.every(w=>PWCRE.test(w)||REPEATRE.test(w)||resolve(w,map)||(map.__keep&&map.__keep.has(w.toUpperCase()))||CHORDLIKE.test(w));
+    const isChordLine=words.length>0&&words.every(w0=>{const w=w0.replace(REPSUFFIX,'');return w===''||PWCRE.test(w)||REPEATRE.test(w)||resolve(w,map)||(map.__keep&&map.__keep.has(w.toUpperCase()))||CHORDLIKE.test(w)});
     if(!isChordLine) return [{kind:'raw',text:line}];
     return parts.map(s=>/^[\s,|\-]+$/.test(s)?{kind:'sep',text:s}:translateToken(s,map,capo));
   });
