@@ -78,6 +78,12 @@ A=B+0</textarea>
   <table id="tests"></table>
 </div>
 
+<div class="card">
+  <label>Chord shapes — what they look like</label>
+  <div class="msg" style="color:var(--mute);margin:0 0 10px">Strings 6 to 1 run left to right. Dots show the finger numbers. The number after the shape (F3, F7...) is the fret the bar sits on. When it is 0 (+0, so the capo/nut is the bar) the finger-1 bar is removed and you play only the remaining notes.</div>
+  <div id="shapes" class="row" style="align-items:flex-start"></div>
+</div>
+
 <script>
 const HEADER=c=>`1=Top String Closest
 6=Bottom String Furthest
@@ -189,6 +195,35 @@ function translate(text,map,capo){
 }
 function esc(s){return s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}
 function plain(rows){return rows.map(r=>r.length&&r[0].kind==='raw'?r[0].text:r.filter(x=>x.kind!=='sep').map(x=>x.text).join(', ')).join('\n')}
+
+// ---- chord shape diagrams ----
+// rel = fret of each string (6 -> 1) relative to the bar fret; fin = finger used
+const SHAPES={
+  F:{rel:[0,2,2,1,0,0],fin:[1,3,4,2,1,1],barLabel:[0,4,5]}
+};
+function shapeSVG(name,N){
+  const sh=SHAPES[name],X0=30,DX=18,Y0=38,DY=28,start=N===0?1:N;
+  const fret=sh.rel.map(r=>N+r);
+  let g=`<svg viewBox="0 0 150 ${Y0+DY*5+14}" width="150" xmlns="http://www.w3.org/2000/svg" style="color:var(--text)">`;
+  for(let r=0;r<=5;r++) g+=`<line x1="${X0}" x2="${X0+DX*5}" y1="${Y0+r*DY}" y2="${Y0+r*DY}" stroke="${r===0&&start===1?'currentColor':'#3a404b'}" stroke-width="${r===0&&start===1?4:1.5}"/>`;
+  for(let i=0;i<6;i++) g+=`<line x1="${X0+i*DX}" x2="${X0+i*DX}" y1="${Y0}" y2="${Y0+DY*5}" stroke="#3a404b" stroke-width="1.5"/>`;
+  if(start>1) g+=`<text x="4" y="${Y0+DY/2+5}" fill="#8d95a3" font-size="12">${start}fr</text>`;
+  if(N>0) g+=`<rect x="${X0-8}" y="${Y0+DY/2-9}" width="${DX*5+16}" height="18" rx="9" fill="#4a90e2" opacity=".85"/>`;
+  sh.rel.forEach((r,i)=>{
+    const f=fret[i],x=X0+i*DX;
+    if(f===0){ g+=`<circle cx="${x}" cy="${Y0-12}" r="5" fill="none" stroke="#8d95a3" stroke-width="1.5"/>`; return; }
+    const isBar=N>0&&r===0;
+    if(isBar&&!sh.barLabel.includes(i)) return;
+    const y=Y0+(f-start)*DY+DY/2;
+    g+=`<circle cx="${x}" cy="${y}" r="9" fill="${isBar?'#2f6fb8':'#4a90e2'}"/><text x="${x}" y="${y+5}" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">${sh.fin[i]}</text>`;
+  });
+  return g+'</svg>';
+}
+function renderShapes(){
+  const el=document.getElementById('shapes');
+  const items=[['F',1,'F1 — bar at fret 1'],['F',3,'F3 — bar at fret 3'],['F',0,'F0 — no bar (+0)']];
+  el.innerHTML=items.map(([n,N,t])=>`<div style="text-align:center;font-size:.8rem;color:var(--mute)">${shapeSVG(n,N)}<div>${t}</div></div>`).join('');
+}
 function render(){
   const {map,errs}=parseRules(document.getElementById('rules').value);
   const rm=document.getElementById('rulemsg');
@@ -235,7 +270,7 @@ document.getElementById('runtests').onclick=runTests;
 document.getElementById('copy').onclick=async()=>{
   try{await navigator.clipboard.writeText(window._last||'');document.getElementById('status').className='msg ok';document.getElementById('status').textContent='Copied.'}catch(e){document.getElementById('status').className='msg bad';document.getElementById('status').textContent='Copy blocked — select the text manually.'}
 };
-render();runTests();
+render();runTests();renderShapes();
 </script>
 </body>
 </html>

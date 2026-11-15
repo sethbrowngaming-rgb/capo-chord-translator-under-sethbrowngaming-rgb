@@ -95,6 +95,30 @@ The default header above is the one used unless you ask for more. For songs that
 
 `*`, `PWC`, `ST`, `X` and `Reverb/Slowed` mean the same as in the default header.
 
+## Chord shapes (what they look like)
+
+Strings are listed 6 to 1 (left to right on the diagram). The page draws these diagrams for you in the "Chord shapes" card.
+
+### F shape (barre)
+
+```
+ 6 5 4 3 2 1   (strings)
+ 1-------1 1   finger 1 = bar across all strings
+       2       finger 2 = string 3, one fret above the bar
+   3 4         fingers 3 and 4 = strings 5 and 4, two frets above the bar
+```
+
+| String | 6 | 5 | 4 | 3 | 2 | 1 |
+|--------|---|---|---|---|---|---|
+| Fret vs. bar | +0 | +2 | +2 | +1 | +0 | +0 |
+| Finger | 1 | 3 | 4 | 2 | 1 | 1 |
+
+The number after the shape is the fret the bar sits on: `F1` = bar at fret 1, `F3` = bar at fret 3, and so on.
+
+**Zero rule:** when the number is 0 (a +0 rule), remove the bar (finger 1) and play only the remaining notes: strings 6, 2 and 1 are open, finger 2 stays on string 3, fingers 3 and 4 stay on strings 5 and 4.
+
+More shapes (F#, B, Bm, PWC) will be added here.
+
 ## How the tool treats your text
 
 - Chord lines (for example `Dm,A,Em,G`) are translated. Chords can be separated by spaces, commas, `|` or dashes.
