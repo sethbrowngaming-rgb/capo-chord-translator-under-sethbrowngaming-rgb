@@ -71,6 +71,30 @@ Reverb/Slowed/Live=-?
 | `X=Repeat` | X means repeat (for example `-X2-` is repeat twice). |
 | `Reverb/Slowed/Live=-?` | Marks whether the version is reverb, slowed or live (fill in the dash). |
 
+## Full dictionary header (optional)
+
+The default header above is the one used unless you ask for more. For songs that need the full legend, pick **Full dictionary** in the "Header type" menu (`examples/full-dictionary-header.txt`). It adds a Gain and Pedal line, more markers, technique symbols, and a blank song layout (Intro, Verse, Pre-chorus, Chorus, Bridge/breakdown/SOLO, Outro) to fill in. Header lines are copied through unchanged, so only the chords are translated.
+
+| Line | Meaning |
+|------|---------|
+| `Capo: ? Gain: ?` | Capo position (the tool reads the number) and the gain/distortion level. |
+| `Pedal: ?` | Pedal or effect used. |
+| `+=Update Chords` | Chords in that part still need updating. |
+| `(Ŝ)=Fill Out Solo` | The solo still needs to be filled out. |
+| `(III)Fill Out Info` | Song info still needs to be filled out. |
+| `RB=Bend` | Bend the string. |
+| `H=Hammer-on` | Hammer-on. |
+| `PO=Pull-off` | Pull-off. |
+| `SL=Slide` | Slide between notes. |
+| `FP=Fast Pick` | Fast picking. |
+| `S=Strum` | Strum. |
+| `T=Tab / Pick` | Play as tab / pick note by note. |
+| `W=Whammy Bar` | Use the whammy bar. |
+| `M=Mute...` | Mute with the fretboard hand and hit with the picking hand. |
+| `~=Vibrato` | Vibrato. |
+
+`*`, `PWC`, `ST`, `X` and `Reverb/Slowed` mean the same as in the default header.
+
 ## How the tool treats your text
 
 - Chord lines (for example `Dm,A,Em,G`) are translated. Chords can be separated by spaces, commas, `|` or dashes.

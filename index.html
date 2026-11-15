@@ -52,7 +52,8 @@ PWC(B/8)</textarea>
   </div>
   <div class="row" style="margin-top:12px">
     <div><label for="capo">Capo (adds to every chord's frets)</label><input type="number" id="capo" min="0" max="20" placeholder="—"></div>
-    <label style="margin:0;text-transform:none;letter-spacing:0;display:flex;gap:6px;align-items:center"><input type="checkbox" id="hdr" checked style="width:auto"> Add the standard header if my text has none</label>
+    <label style="margin:0;text-transform:none;letter-spacing:0;display:flex;gap:6px;align-items:center"><input type="checkbox" id="hdr" checked style="width:auto"> Add a header if my text has none</label>
+    <div><label for="hmode">Header type</label><select id="hmode" style="background:#0f1114;color:var(--text);border:1px solid var(--line);border-radius:8px;padding:10px;font:15px system-ui"><option value="std">Standard (default)</option><option value="full">Full dictionary</option></select></div>
     <button id="copy">Copy result</button>
   </div>
   <div class="msg" id="status"></div>
@@ -91,6 +92,59 @@ X=Repeat
 -----------------------------
 Reverb/Slowed/Live=-?
 -----------------------------`;
+const HEADER_FULL=c=>`1=Top string closest
+6=Bottom string furthest
+(String / Note)
+Capo: ${c} Gain: ?
+Tuning: ?
+Pedal: ?
+*=Fix or Finish
++=Update Chords
+(Ŝ)=Fill Out Solo
+(III)Fill Out Info
+------------------------------
+PWC=Power Chord
+RB=Bend
+H=Hammer-on
+PO=Pull-off
+SL=Slide
+FP=Fast Pick
+ST=Pick at same time
+S=Strum
+T=Tab / Pick
+W=Whammy Bar
+M=Mute with fretboard hand
+and hit with picking hand
+~=Vibrato
+X=Repeat
+-----------------------------
+Reverb/Slowed=-?
+-----------------------------
+The Whole Song
+
+
+Intro
+
+
+Verse
+
+
+Pre-chorus
+
+
+Chorus
+
+
+Verse
+Pre-chorus
+Chorus
+Bridge/breakdown/SOLO
+
+
+Verse
+Pre-Chorus
+Chorus
+Outro`;
 const PWC_SHAPES=['F','F#','B'];
 function parseRules(text){
   const map={},errs=[];
@@ -147,7 +201,8 @@ function render(){
   let info='';
   if(cm){capo=parseInt(cm[1],10);info='Capo '+capo+' read from the text.';}
   else if(document.getElementById('hdr').checked){
-    input=HEADER(capo===null?0:capo)+'\n\n'+input;
+    const full=document.getElementById('hmode').value==='full';
+    input=(full?HEADER_FULL:HEADER)(capo===null?0:capo)+'\n\n'+input;
   }
   const rows=translate(input,map,capo);
   window._last=plain(rows);
@@ -175,7 +230,7 @@ function runTests(){
     return `<tr><td>${k}</td><td>${v.replace('+','')}</td><td>${esc(g)}</td><td class="${ok?'pass':'fail'}">${ok?'PASS':'FAIL'}</td></tr>`;
   }).join('');
 }
-['inp','rules','capo','hdr'].forEach(id=>document.getElementById(id).addEventListener('input',render));
+['inp','rules','capo','hdr','hmode'].forEach(id=>document.getElementById(id).addEventListener('input',render));
 document.getElementById('runtests').onclick=runTests;
 document.getElementById('copy').onclick=async()=>{
   try{await navigator.clipboard.writeText(window._last||'');document.getElementById('status').className='msg ok';document.getElementById('status').textContent='Copied.'}catch(e){document.getElementById('status').className='msg bad';document.getElementById('status').textContent='Copy blocked — select the text manually.'}

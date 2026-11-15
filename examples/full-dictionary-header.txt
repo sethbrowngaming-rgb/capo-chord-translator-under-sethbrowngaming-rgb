@@ -1,0 +1,53 @@
+1=Top string closest
+6=Bottom string furthest
+(String / Note)
+Capo: 0 Gain: ?
+Tuning: ?
+Pedal: ?
+*=Fix or Finish
++=Update Chords
+(Ŝ)=Fill Out Solo
+(III)Fill Out Info
+------------------------------
+PWC=Power Chord
+RB=Bend
+H=Hammer-on
+PO=Pull-off
+SL=Slide
+FP=Fast Pick
+ST=Pick at same time
+S=Strum
+T=Tab / Pick
+W=Whammy Bar
+M=Mute with fretboard hand
+and hit with picking hand
+~=Vibrato
+X=Repeat
+-----------------------------
+Reverb/Slowed=-?
+-----------------------------
+The Whole Song
+
+
+Intro
+
+
+Verse
+
+
+Pre-chorus
+
+
+Chorus
+
+
+Verse
+Pre-chorus
+Chorus
+Bridge/breakdown/SOLO
+
+
+Verse
+Pre-Chorus
+Chorus
+Outro
