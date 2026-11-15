@@ -197,6 +197,7 @@ function translateToken(tok,map,capo){
     const ok=PWC_SHAPES.includes(shape);
     return {kind:ok?'pwc':'bad',text:ok?`PWC(${shape}/${p[2]})`:`PWC(${p[1]}/${p[2]})`,note:ok?'':'shape must be F, F# or B'};
   }
+  if(REPEATRE.test(tok)) return {kind:'keep',text:tok,note:''};
   if(map.__keep&&map.__keep.has(tok.toUpperCase())) return {kind:'keep',text:tok,note:''};
   const rule=resolve(tok,map);
   if(!rule) return {kind:'bad',text:tok,note:'no rule'};
@@ -205,12 +206,13 @@ function translateToken(tok,map,capo){
   return {kind:'ok',text:`${shape}${plus}`,note:''};
 }
 const CHORDLIKE=/^[A-Ga-g][#b]?(m|min|maj|M)?\d*(sus\d?|dim|aug)?$/;
+const REPEATRE=/^(?:[Xx]\d*|\d+[Xx])$/; // X2, x3, 2X = repeat markers, left as written
 const PWCRE=/^PWC\([^)]*\)$/i;
 function translate(text,map,capo){
   return text.split(/\r?\n/).map(line=>{
     const parts=line.split(/(PWC\([^)]*\)|[\s,|\-]+)/i).filter(s=>s!==''&&s!==undefined);
     const words=parts.filter(s=>!/^[\s,|\-]+$/.test(s));
-    const isChordLine=words.length>0&&words.every(w=>PWCRE.test(w)||resolve(w,map)||(map.__keep&&map.__keep.has(w.toUpperCase()))||CHORDLIKE.test(w));
+    const isChordLine=words.length>0&&words.every(w=>PWCRE.test(w)||REPEATRE.test(w)||resolve(w,map)||(map.__keep&&map.__keep.has(w.toUpperCase()))||CHORDLIKE.test(w));
     if(!isChordLine) return [{kind:'raw',text:line}];
     return parts.map(s=>/^[\s,|\-]+$/.test(s)?{kind:'sep',text:s}:translateToken(s,map,capo));
   });
