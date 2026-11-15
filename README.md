@@ -63,6 +63,10 @@ A repeat marker can also be attached to a chord with an underscore. The undersco
 
 The capo is already added into the translated frets, so the `Capo:` line in the result is changed to `Capo: 0`. Other text on that line (like `Gain: 2`) is kept. This also means you can paste a translated note back in without the capo being added twice.
 
+### "MINOR" written out
+
+A chord written as a letter followed by the word minor, in any capitalization, is read as the short minor name: `E MINOR` is `Em` and `A minor` is `Am`. The same works for other letters (`D minor` is `Dm`), then the normal rules apply. Brackets around it, like `(E MINOR)`, are dropped.
+
 ### Repeat markers
 
 An `X` with a number (`X2`, `x3`, or `2X`) means repeat. It stays exactly as written and the chords on the same line still translate: `Am,D,G,Em,X2` with Capo 4 becomes `Bm4, B9, F7, F#4, X2`.

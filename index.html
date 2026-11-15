@@ -274,6 +274,7 @@ function render(){
     const full=document.getElementById('hmode').value==='full';
     input=(full?HEADER_FULL:HEADER)(capo===null?0:capo)+'\n\n'+input;
   }
+  input=input.replace(/\(?\b([A-Ga-g][#b]?)\s+minor(?![A-Za-z])\)?/gi,(m,n)=>n[0].toUpperCase()+n.slice(1)+'m'); // E MINOR -> Em
   const rows=translate(input,map,capo);
   window._last=plain(rows).replace(/^(\s*Capo:\s*)\d+/im,(m,a)=>a+'0'); // capo is already added into the frets
   const ot=document.getElementById('outText');ot.value=window._last;ot.style.height='auto';ot.style.height=Math.min(ot.scrollHeight+4,600)+'px';
