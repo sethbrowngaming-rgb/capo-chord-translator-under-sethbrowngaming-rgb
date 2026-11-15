@@ -56,6 +56,7 @@ PWC(B/8)</textarea>
     <label style="margin:0;text-transform:none;letter-spacing:0;display:flex;gap:6px;align-items:center"><input type="checkbox" id="hdr" checked style="width:auto"> Add a header if my text has none</label>
     <div><label for="hmode">Header type</label><select id="hmode" style="background:#0f1114;color:var(--text);border:1px solid var(--line);border-radius:8px;padding:10px;font:15px system-ui"><option value="std">Standard (default)</option><option value="full">Full dictionary</option></select></div>
     <label style="margin:0;text-transform:none;letter-spacing:0;display:flex;gap:6px;align-items:center"><input type="checkbox" id="autocopy" checked style="width:auto"> Auto-copy when I paste</label>
+    <label style="margin:0;text-transform:none;letter-spacing:0;display:flex;gap:6px;align-items:center"><input type="checkbox" id="boldcopy" checked style="width:auto"> Paste as bold (Google Keep)</label>
     <button id="pastebtn">Paste, translate &amp; copy</button>
     <button id="copy" class="ghost">Copy result</button>
     <button id="clear" class="ghost">Clear</button>
@@ -295,8 +296,21 @@ function runTests(){
 document.getElementById('runtests').onclick=runTests;
 async function copyOut(msg){
   const st=document.getElementById('status');
-  try{await navigator.clipboard.writeText(window._last||'');st.className='msg ok';st.textContent=msg;}
-  catch(e){const o=document.getElementById('outText');o.focus();o.select();st.className='msg bad';st.textContent='Browser blocked auto-copy. The result is selected: press Ctrl+C.';}
+  const plain=window._last||'';
+  const bold=document.getElementById('boldcopy').checked;
+  try{
+    if(bold&&window.ClipboardItem&&navigator.clipboard.write){
+      const esc=t=>t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      const html='<meta charset="utf-8"><b>'+plain.split('\n').map(esc).join('<br>')+'</b>';
+      await navigator.clipboard.write([new ClipboardItem({'text/html':new Blob([html],{type:'text/html'}),'text/plain':new Blob([plain],{type:'text/plain'})})]);
+    }else{
+      await navigator.clipboard.writeText(plain);
+    }
+    st.className='msg ok';st.textContent=msg+(bold?' (bold)':'');
+  }catch(e){
+    try{await navigator.clipboard.writeText(plain);st.className='msg ok';st.textContent=msg+' (plain text; bold was blocked)';return;}catch(e2){}
+    const o=document.getElementById('outText');o.focus();o.select();st.className='msg bad';st.textContent='Browser blocked auto-copy. The result is selected: press Ctrl+C.';
+  }
 }
 document.getElementById('copy').onclick=()=>copyOut('Copied.');
 document.getElementById('outText').addEventListener('click',e=>e.target.select());

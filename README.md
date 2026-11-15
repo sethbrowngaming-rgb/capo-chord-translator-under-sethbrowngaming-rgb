@@ -140,6 +140,8 @@ PWC (power chord) diagram coming soon.
 2. Click **Paste, translate & copy**. (Or click the left box, press Ctrl+V, and it translates and copies automatically.)
 3. Paste the result wherever you want it.
 
+By default the copy is **bold** (rich text), so it pastes into Google Keep already bolded. Untick "Paste as bold (Google Keep)" to copy plain text instead. Keep has no font, size or color settings that a web page can set, so bold is the one setting this controls.
+
 The translated note is a plain-text box, so the formatting copies exactly. If your browser blocks clipboard access, the result gets selected for you: press Ctrl+C.
 
 ## How the tool treats your text
