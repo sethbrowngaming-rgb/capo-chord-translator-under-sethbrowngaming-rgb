@@ -148,7 +148,22 @@ Same number rule as F: `F#1` = bar at fret 1, `F#3` = bar at fret 3. At 0 (`F#0`
 
 Same number rule: `Bm1` = bar at fret 1, `Bm3` = bar at fret 3. At 0 (`Bm0`) the bar comes off: strings 6, 5 and 1 are open, finger 2 stays on string 2, fingers 3 and 4 stay on strings 4 and 3.
 
-More shapes (B, PWC) will be added here.
+### B shape (barre)
+
+```
+ 6 5 4 3 2 1   (strings)
+ 1 1       1   finger 1 = bar (strings 6, 5 and 1 shown)
+     2 3 4     fingers 2, 3 and 4 = strings 4, 3 and 2, two frets above the bar
+```
+
+| String | 6 | 5 | 4 | 3 | 2 | 1 |
+|--------|---|---|---|---|---|---|
+| Fret vs. bar | +0 | +0 | +2 | +2 | +2 | +0 |
+| Finger | 1 | 1 | 2 | 3 | 4 | 1 |
+
+Same number rule: `B1` = bar at fret 1, `B3` = bar at fret 3. At 0 (`B0`) the bar comes off: strings 6, 5 and 1 are open and fingers 2, 3 and 4 stay on strings 4, 3 and 2.
+
+More shapes (PWC) will be added here.
 
 ## How the tool treats your text
 
