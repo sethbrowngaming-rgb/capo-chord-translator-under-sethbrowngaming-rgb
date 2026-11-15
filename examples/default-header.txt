@@ -1,0 +1,13 @@
+1=Top String Closest
+6=Bottom String Furthest
+(String / Note)
+Capo: 0
+Tuning: STAND
+*=Fix or Finish
+------------------------------
+PWC=Power Chord
+ST=Pick At Same Time
+X=Repeat
+-----------------------------
+Reverb/Slowed/Live=-?
+-----------------------------

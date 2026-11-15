@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Capo Chord Translator</title>
+<style>
+  :root{--bg:#14161a;--panel:#1d2026;--line:#2d323b;--text:#e8eaee;--mute:#8d95a3;--acc:#f5b942;--bad:#ff6b6b;--ok:#6bd88a}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font:16px/1.45 system-ui,sans-serif;padding:20px;max-width:900px;margin-inline:auto}
+  h1{font-size:1.4rem;margin:0 0 4px} p.sub{color:var(--mute);margin:0 0 18px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:700px){.grid{grid-template-columns:1fr}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:14px}
+  label{display:block;font-size:.8rem;color:var(--mute);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+  textarea,input{width:100%;background:#0f1114;color:var(--text);border:1px solid var(--line);border-radius:8px;padding:10px;font:15px/1.5 ui-monospace,Consolas,monospace}
+  textarea{min-height:150px;resize:vertical}
+  input[type=number]{width:90px}
+  .out{font:15px/1.9 ui-monospace,Consolas,monospace;white-space:pre-wrap;min-height:60px}
+  .chip{display:inline-block;background:#0f1114;border:1px solid var(--line);border-radius:6px;padding:0 8px;margin:2px 2px;color:var(--acc)}
+  .chip small{color:var(--mute);font-size:.7em;margin-left:4px}
+  .chip.pwc{color:#7fc4ff}
+  .chip.bad{color:var(--bad);border-color:var(--bad)}
+  .chip.raw{color:var(--text)}
+  .row{display:flex;gap:12px;align-items:end;flex-wrap:wrap}
+  button{background:var(--acc);color:#14161a;border:0;border-radius:8px;padding:9px 14px;font-weight:600;cursor:pointer}
+  button.ghost{background:transparent;color:var(--text);border:1px solid var(--line)}
+  .msg{font-size:.85rem;margin-top:6px} .msg.bad{color:var(--bad)} .msg.ok{color:var(--ok)}
+  table{border-collapse:collapse;width:100%;font:14px ui-monospace,Consolas,monospace}
+  td,th{border-bottom:1px solid var(--line);padding:4px 8px;text-align:left}
+  th{color:var(--mute);font-weight:500}
+  td.pass{color:var(--ok)} td.fail{color:var(--bad)}
+</style>
+</head>
+<body>
+<h1>Capo Chord Translator</h1>
+<p class="sub">Type chord names. Get the barre shape + frets from the capo, using your rules.</p>
+
+<div class="card">
+  <div class="grid">
+    <div>
+      <label for="inp">Notes / chords in (any number)</label>
+      <textarea id="inp" spellcheck="false">G C D Em
+Am E A Dm
+G, C | D - Em
+PWC(B/8)</textarea>
+    </div>
+    <div>
+      <label>Translated</label>
+      <div class="out" id="out"></div>
+    </div>
+  </div>
+  <div class="row" style="margin-top:12px">
+    <div><label for="capo">Capo (adds to every chord's frets)</label><input type="number" id="capo" min="0" max="20" placeholder="—"></div>
+    <label style="margin:0;text-transform:none;letter-spacing:0;display:flex;gap:6px;align-items:center"><input type="checkbox" id="hdr" checked style="width:auto"> Add the standard header if my text has none</label>
+    <button id="copy">Copy result</button>
+  </div>
+  <div class="msg" id="status"></div>
+</div>
+
+<div class="card">
+  <label for="rules">Your rules (edit or add lines — format: CHORD=SHAPE+FRETS)</label>
+  <textarea id="rules" spellcheck="false">G=F+3
+C=B+3
+D=B+5
+Dm=Bm+5
+E=F+0
+Em=F#+0
+Am=Bm+0
+A=B+0</textarea>
+  <div class="msg" id="rulemsg"></div>
+  <div class="msg" style="color:var(--mute)">PWC(shape/fret): shape must be F, F# or B. PWC tokens are passed through and checked, since no conversion rule was given for them.</div>
+</div>
+
+<div class="card">
+  <div class="row" style="justify-content:space-between"><label style="margin:0">Self-check against your original list</label><button class="ghost" id="runtests">Run</button></div>
+  <table id="tests"></table>
+</div>
+
+<script>
+const HEADER=c=>`1=Top String Closest
+6=Bottom String Furthest
+(String / Note)
+Capo: ${c}
+Tuning: STAND
+*=Fix or Finish
+------------------------------
+PWC=Power Chord
+ST=Pick At Same Time
+X=Repeat
+-----------------------------
+Reverb/Slowed/Live=-?
+-----------------------------`;
+const PWC_SHAPES=['F','F#','B'];
+function parseRules(text){
+  const map={},errs=[];
+  text.split(/\r?\n/).forEach((l,i)=>{
+    l=l.trim(); if(!l) return;
+    const m=l.match(/^([A-Za-z#]+)\s*=\s*([A-Za-z#]+)\s*\+\s*(\d+)$/);
+    if(!m){errs.push('Line '+(i+1)+': "'+l+'" not understood');return;}
+    map[m[1]]={shape:m[2],plus:parseInt(m[3],10)};
+  });
+  return {map,errs};
+}
+function normName(t){ // keep case as typed for exact match, else try tidy-ups
+  return [t, t[0].toUpperCase()+t.slice(1).toLowerCase(), t[0].toUpperCase()+t.slice(1)];
+}
+function lookup(tok,map){
+  for(const c of normName(tok)) if(map[c]) return {key:c,rule:map[c]};
+  return null;
+}
+function translateToken(tok,map,capo){
+  const p=tok.match(/^PWC\(\s*([A-Za-z#]+)\s*\/\s*(\d+)\s*\)$/i);
+  if(p){
+    const shape=p[1].length>1?p[1][0].toUpperCase()+p[1].slice(1):p[1].toUpperCase();
+    const ok=PWC_SHAPES.includes(shape);
+    return {kind:ok?'pwc':'bad',text:ok?`PWC(${shape}/${p[2]})`:`PWC(${p[1]}/${p[2]})`,note:ok?'':'shape must be F, F# or B'};
+  }
+  const hit=lookup(tok,map);
+  if(!hit) return {kind:'bad',text:tok,note:'no rule'};
+  const {shape,plus}=hit.rule;
+  if(capo!==null && capo>0) return {kind:'ok',text:`${shape}${plus+capo}`,note:`was ${shape}${plus}`};
+  return {kind:'ok',text:`${shape}${plus}`,note:''};
+}
+const CHORDLIKE=/^[A-Ga-g][#b]?(m|min|maj|M)?\d*(sus\d?|dim|aug)?$/;
+const PWCRE=/^PWC\([^)]*\)$/i;
+function translate(text,map,capo){
+  return text.split(/\r?\n/).map(line=>{
+    const parts=line.split(/(PWC\([^)]*\)|[\s,|\-]+)/i).filter(s=>s!==''&&s!==undefined);
+    const words=parts.filter(s=>!/^[\s,|\-]+$/.test(s));
+    const isChordLine=words.length>0&&words.every(w=>PWCRE.test(w)||lookup(w,map)||CHORDLIKE.test(w));
+    if(!isChordLine) return [{kind:'raw',text:line}];
+    return parts.map(s=>/^[\s,|\-]+$/.test(s)?{kind:'sep',text:s}:translateToken(s,map,capo));
+  });
+}
+function esc(s){return s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}
+function plain(rows){return rows.map(r=>r.length&&r[0].kind==='raw'?r[0].text:r.filter(x=>x.kind!=='sep').map(x=>x.text).join(', ')).join('\n')}
+function render(){
+  const {map,errs}=parseRules(document.getElementById('rules').value);
+  const rm=document.getElementById('rulemsg');
+  rm.className='msg '+(errs.length?'bad':'ok');
+  rm.textContent=errs.length?errs.join(' · '):Object.keys(map).length+' rules loaded';
+  const capoRaw=document.getElementById('capo').value;
+  let capo=capoRaw===''?null:parseInt(capoRaw,10);
+  let input=document.getElementById('inp').value;
+  const cm=input.match(/^\s*Capo:\s*(\d+)/im);
+  let info='';
+  if(cm){capo=parseInt(cm[1],10);info='Capo '+capo+' read from the text.';}
+  else if(document.getElementById('hdr').checked){
+    input=HEADER(capo===null?0:capo)+'\n\n'+input;
+  }
+  const rows=translate(input,map,capo);
+  window._last=plain(rows);
+  let bad=0;
+  document.getElementById('out').innerHTML=rows.map(r=>{
+    if(r.length&&r[0].kind==='raw') return esc(r[0].text);
+    return r.map(x=>{
+      if(x.kind==='sep')return '<span> </span>';
+      if(x.kind==='bad')bad++;
+      const cls=x.kind==='ok'?'':x.kind;
+      return `<span class="chip ${cls}">${esc(x.text)}${x.note?`<small>${esc(x.note)}</small>`:''}</span>`;
+    }).join('');
+  }).join('<br>');
+  const st=document.getElementById('status');
+  st.className='msg '+(bad?'bad':'ok');
+  st.textContent=bad?bad+' item(s) could not be translated (red).':info;
+}
+const ORIGINAL={G:'F+3',C:'B+3',D:'B+5',Dm:'Bm+5',E:'F+0',Em:'F#+0',Am:'Bm+0',A:'B+0'};
+function runTests(){
+  const {map}=parseRules(document.getElementById('rules').value);
+  const t=document.getElementById('tests');
+  t.innerHTML='<tr><th>In</th><th>Expected</th><th>Got</th><th></th></tr>'+Object.entries(ORIGINAL).map(([k,v])=>{
+    const g=translateToken(k,map,null).text;
+    const ok=g===v.replace('+','');
+    return `<tr><td>${k}</td><td>${v.replace('+','')}</td><td>${esc(g)}</td><td class="${ok?'pass':'fail'}">${ok?'PASS':'FAIL'}</td></tr>`;
+  }).join('');
+}
+['inp','rules','capo','hdr'].forEach(id=>document.getElementById(id).addEventListener('input',render));
+document.getElementById('runtests').onclick=runTests;
+document.getElementById('copy').onclick=async()=>{
+  try{await navigator.clipboard.writeText(window._last||'');document.getElementById('status').className='msg ok';document.getElementById('status').textContent='Copied.'}catch(e){document.getElementById('status').className='msg bad';document.getElementById('status').textContent='Copy blocked — select the text manually.'}
+};
+render();runTests();
+</script>
+</body>
+</html>

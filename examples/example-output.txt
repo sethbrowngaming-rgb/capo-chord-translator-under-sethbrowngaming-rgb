@@ -1,0 +1,35 @@
+1=Top String Closest
+6=Bottom String Furthest
+(String / Note)
+Capo: 4
+Tuning: STAND
+*=Fix or Finish
+------------------------------
+PWC=Power Chord
+ST=Pick At Same Time
+X=Repeat
+-----------------------------
+Reverb/Slowed/Live=-?
+-----------------------------
+
+VERSE-X
+Bm9, B4, F#4, F7
+
+PRE-CHORUS
+F#4, F7, Bm9, B4
+
+CHORUS
+B9, B4, F#4, F7
+
+VERSE
+PRE-CHORUS
+CHORUS
+SOLO
+(2/5)(2/9)(2/10)(2/7)(2/5)-X2-(2/5)(2/7)(3/5)(4/4)(5/5)(5/7)(5/8)-(5/7)(5/8)(5/7)(4/7)(3/7)(3/5)(3/4)(2/2)
+
+BRIDGE
+F#4, F7, B9, B4
+
+CHORUS
+OUTRO
+B9
