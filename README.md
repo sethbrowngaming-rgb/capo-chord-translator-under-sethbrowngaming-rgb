@@ -33,6 +33,7 @@ Example, capo 4: `D = B+5` becomes **B9**. `Em = F#+0` becomes **F#4**. `G = F+3
 | A  | B+0  | B4  |
 | Gm | F+3  | F7  |
 | F#m | F#+1 | F#5 |
+| Am7 | Bm+0 | Bm4 (same as Am) |
 
 ### Shapes with no number, and shapes with a number
 
