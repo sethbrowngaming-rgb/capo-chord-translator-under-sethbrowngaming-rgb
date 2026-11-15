@@ -192,14 +192,14 @@ function resolve(tok,map){
 }
 function translateToken(tok,map,capo){
   const att=tok.match(/^(.+?)(_(?:[Xx]\d*|\d+[Xx]))$/);
-  if(att){const r=translateToken(att[1],map,capo);return {...r,text:r.text+att[2]};}
+  if(att){const r=translateToken(att[1],map,capo);return {...r,text:r.text+' '+att[2].slice(1)};}
   const p=tok.match(/^PWC\(\s*([A-Za-z#]+)\s*\/\s*(\d+)\s*\)$/i);
   if(p){
     const shape=p[1].length>1?p[1][0].toUpperCase()+p[1].slice(1):p[1].toUpperCase();
     const ok=PWC_SHAPES.includes(shape);
     return {kind:ok?'pwc':'bad',text:ok?`PWC(${shape}/${p[2]})`:`PWC(${p[1]}/${p[2]})`,note:ok?'':'shape must be F, F# or B'};
   }
-  if(REPEATRE.test(tok)) return {kind:'keep',text:tok,note:''};
+  if(REPEATRE.test(tok)) return {kind:'keep',text:tok.replace(/^_/,''),note:''};
   if(map.__keep&&map.__keep.has(tok.toUpperCase())) return {kind:'keep',text:tok,note:''};
   const rule=resolve(tok,map);
   if(!rule) return {kind:'bad',text:tok,note:'no rule'};
