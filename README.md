@@ -31,6 +31,21 @@ Example, capo 4: `D = B+5` becomes **B9**. `Em = F#+0` becomes **F#4**. `G = F+3
 | Em | F#+0 | F#4 |
 | Am | Bm+0 | Bm4 |
 | A  | B+0  | B4  |
+| Gm | F+3  | F7  |
+| F#m | F#+1 | F#5 |
+
+### Shapes with no number, and shapes with a number
+
+A shape written without a number gets a default fret (capo 0):
+
+| Written | Read as |
+|---------|---------|
+| `Bm` | `Bm2` |
+| `B` | `B2` |
+| `F` | `F1` |
+| `F#` | `F#1` |
+
+A shape written with a number is used as is, so `F3` is F at fret 3 and `Bm5` is Bm at fret 5. The capo is added to every number, so with Capo 4 `Bm` becomes `Bm6` and `F3` becomes `F7`.
 
 The rules are editable in the page. Add your own lines in the same `CHORD=SHAPE+FRETS` format.
 

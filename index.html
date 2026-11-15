@@ -72,7 +72,13 @@ Dm=Bm+5
 E=F+0
 Em=F#+0
 Am=Bm+0
-A=B+0</textarea>
+A=B+0
+Gm=F+3
+F#m=F#+1
+Bm=Bm+2
+B=B+2
+F=F+1
+F#=F#+1</textarea>
   <div class="msg" id="rulemsg"></div>
   <div class="msg" style="color:var(--mute)">PWC(shape/fret): shape must be F, F# or B. PWC tokens are passed through and checked, since no conversion rule was given for them.</div>
 </div>
@@ -173,6 +179,12 @@ function lookup(tok,map){
   for(const c of normName(tok)) if(map[c]) return {key:c,rule:map[c]};
   return null;
 }
+function resolve(tok,map){
+  const h=lookup(tok,map); if(h) return h.rule;
+  const m=tok.match(/^(F#|F|Bm|B)(\d+)$/i); // shape + fret, e.g. F3, Bm5
+  if(m){const sh=m[1].toLowerCase()==='bm'?'Bm':m[1].toUpperCase();return {shape:sh,plus:parseInt(m[2],10)};}
+  return null;
+}
 function translateToken(tok,map,capo){
   const p=tok.match(/^PWC\(\s*([A-Za-z#]+)\s*\/\s*(\d+)\s*\)$/i);
   if(p){
@@ -180,9 +192,9 @@ function translateToken(tok,map,capo){
     const ok=PWC_SHAPES.includes(shape);
     return {kind:ok?'pwc':'bad',text:ok?`PWC(${shape}/${p[2]})`:`PWC(${p[1]}/${p[2]})`,note:ok?'':'shape must be F, F# or B'};
   }
-  const hit=lookup(tok,map);
-  if(!hit) return {kind:'bad',text:tok,note:'no rule'};
-  const {shape,plus}=hit.rule;
+  const rule=resolve(tok,map);
+  if(!rule) return {kind:'bad',text:tok,note:'no rule'};
+  const {shape,plus}=rule;
   if(capo!==null && capo>0) return {kind:'ok',text:`${shape}${plus+capo}`,note:`was ${shape}${plus}`};
   return {kind:'ok',text:`${shape}${plus}`,note:''};
 }
@@ -192,7 +204,7 @@ function translate(text,map,capo){
   return text.split(/\r?\n/).map(line=>{
     const parts=line.split(/(PWC\([^)]*\)|[\s,|\-]+)/i).filter(s=>s!==''&&s!==undefined);
     const words=parts.filter(s=>!/^[\s,|\-]+$/.test(s));
-    const isChordLine=words.length>0&&words.every(w=>PWCRE.test(w)||lookup(w,map)||CHORDLIKE.test(w));
+    const isChordLine=words.length>0&&words.every(w=>PWCRE.test(w)||resolve(w,map)||CHORDLIKE.test(w));
     if(!isChordLine) return [{kind:'raw',text:line}];
     return parts.map(s=>/^[\s,|\-]+$/.test(s)?{kind:'sep',text:s}:translateToken(s,map,capo));
   });
@@ -264,7 +276,7 @@ function render(){
   st.className='msg '+(bad?'bad':'ok');
   st.textContent=bad?bad+' item(s) could not be translated (red).':info;
 }
-const ORIGINAL={G:'F+3',C:'B+3',D:'B+5',Dm:'Bm+5',E:'F+0',Em:'F#+0',Am:'Bm+0',A:'B+0'};
+const ORIGINAL={G:'F+3',C:'B+3',D:'B+5',Dm:'Bm+5',E:'F+0',Em:'F#+0',Am:'Bm+0',A:'B+0',Gm:'F+3',"F#m":'F#+1',Bm:'Bm+2',B:'B+2',F:'F+1',"F#":'F#+1'};
 function runTests(){
   const {map}=parseRules(document.getElementById('rules').value);
   const t=document.getElementById('tests');
