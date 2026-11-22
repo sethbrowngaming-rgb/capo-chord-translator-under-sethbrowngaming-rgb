@@ -67,6 +67,10 @@ The capo is already added into the translated frets, so the `Capo:` line in the 
 
 A chord written as a letter followed by the word minor, in any capitalization, is read as the short minor name: `E MINOR` is `Em` and `A minor` is `Am`. The same works for other letters (`D minor` is `Dm`), then the normal rules apply. Brackets around it, like `(E MINOR)`, are dropped.
 
+### Symbols between or next to chords
+
+A line of chords is translated even if it has symbols in it (`•`, `·`, `…`, `→`, `*`, `~` and so on). A symbol standing on its own is kept as written with spaces around it: `Am • D • G` becomes `Bm0 • B5 • F3`. A symbol attached to a chord stays attached to the translated chord: `Am* D~` becomes `Bm0*, B5~`. A line that only has symbols and no chords is left alone, and so are header lines like `PWC=Power Chord`.
+
 ### Repeat markers
 
 An `X` with a number (`X2`, `x3`, or `2X`) means repeat. It stays exactly as written and the chords on the same line still translate: `Am,D,G,Em,X2` with Capo 4 becomes `Bm4, B9, F7, F#4, X2`.

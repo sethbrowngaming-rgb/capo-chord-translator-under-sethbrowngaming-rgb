@@ -21,7 +21,7 @@
   .chip small{color:var(--mute);font-size:.7em;margin-left:4px}
   .chip.pwc{color:#7fc4ff}
   .chip.bad{color:var(--bad);border-color:var(--bad)}
-  .chip.raw,.chip.keep{color:var(--text)}
+  .chip.raw,.chip.keep,.chip.sym{color:var(--text)}
   .row{display:flex;gap:12px;align-items:end;flex-wrap:wrap}
   button{background:var(--acc);color:#14161a;border:0;border-radius:8px;padding:9px 14px;font-weight:600;cursor:pointer}
   button.ghost{background:transparent;color:var(--text);border:1px solid var(--line)}
@@ -215,17 +215,31 @@ const CHORDLIKE=/^[A-Ga-g][#b]?(m|min|maj|M)?\d*(sus\d?|dim|aug)?$/;
 const REPEATRE=/^_?(?:[Xx]\d*|\d+[Xx])$/;
 const REPSUFFIX=/_(?:[Xx]\d*|\d+[Xx])$/; // chord with repeat attached: Am_X2, D_X // X2, x3, 2X = repeat markers, left as written
 const PWCRE=/^PWC\([^)]*\)$/i;
+// symbols (anything that is not a letter, digit or #) next to chords are kept as written
+function peel(tok){const m=tok.match(/^([^A-Za-z0-9#(_]*)([\s\S]*?)([^A-Za-z0-9#)_]*)$/);return {l:m[1],core:m[2],t:m[3]};}
+function okCore(c0,map){const c=c0.replace(REPSUFFIX,'');return c===''||PWCRE.test(c)||REPEATRE.test(c)||!!resolve(c,map)||!!(map.__keep&&map.__keep.has(c.toUpperCase()))||CHORDLIKE.test(c);}
+function isChordCore(c0,map){const c=c0.replace(REPSUFFIX,'');return c!==''&&(PWCRE.test(c)||!!resolve(c,map)||!!(map.__keep&&map.__keep.has(c.toUpperCase()))||CHORDLIKE.test(c));}
+function translateSym(s,map,capo){
+  const p=peel(s);
+  if(p.core==='') return {kind:'sym',text:s,note:''};
+  const r=translateToken(p.core,map,capo);
+  return (p.l||p.t)?{...r,text:p.l+r.text+p.t}:r;
+}
 function translate(text,map,capo){
   return text.split(/\r?\n/).map(line=>{
     const parts=line.split(/(PWC\([^)]*\)(?:_(?:[Xx]\d*|\d+[Xx]))?|[\s,|\-]+)/i).filter(s=>s!==''&&s!==undefined);
     const words=parts.filter(s=>!/^[\s,|\-]+$/.test(s));
-    const isChordLine=words.length>0&&words.every(w0=>{const w=w0.replace(REPSUFFIX,'');return w===''||PWCRE.test(w)||REPEATRE.test(w)||resolve(w,map)||(map.__keep&&map.__keep.has(w.toUpperCase()))||CHORDLIKE.test(w)});
+    const isChordLine=words.length>0&&words.every(w=>okCore(peel(w).core,map))&&words.some(w=>isChordCore(peel(w).core,map));
     if(!isChordLine) return [{kind:'raw',text:line}];
-    return parts.map(s=>/^[\s,|\-]+$/.test(s)?{kind:'sep',text:s}:translateToken(s,map,capo));
+    return parts.map(s=>/^[\s,|\-]+$/.test(s)?{kind:'sep',text:s}:translateSym(s,map,capo));
   });
 }
 function esc(s){return s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}
-function plain(rows){return rows.map(r=>r.length&&r[0].kind==='raw'?r[0].text:r.filter(x=>x.kind!=='sep').map(x=>x.text).join(', ')).join('\n')}
+function plain(rows){return rows.map(r=>{
+  if(r.length&&r[0].kind==='raw') return r[0].text;
+  const t=r.filter(x=>x.kind!=='sep');
+  return t.map((x,i)=>(i===0?'':((t[i-1].kind==='sym'||x.kind==='sym')?' ':', '))+x.text).join('');
+}).join('\n')}
 
 // ---- chord shape diagrams ----
 // rel = fret of each string (6 -> 1) relative to the bar fret; fin = finger used
