@@ -327,7 +327,7 @@ function findHeaderEnd(lines){
   for(let i=0;i<Math.min(lines.length,80);i++){
     const l=lines[i];
     if(!l.trim()) continue;
-    const strong=HDRLINE.test(l)||KNOWNKEY.test(l)||/^\s*Reverb\/Slowed/i.test(l);
+    const strong=HDRLINE.test(l)||KNOWNKEY.test(l)||/^\s*Reverb\/Slowed/i.test(l)||/^\s*\(\s*string\s*\/\s*note\s*\)/i.test(l);
     const generic=started&&/^\s*[A-Za-z][A-Za-z ]{0,19}:\s*\S/.test(l)&&!SECTIONW.test(l);
     const cont=started&&prevLegend&&/^\s*[a-z][^=0-9\/]*$/.test(l); // e.g. "and hit with picking hand"
     if(strong||generic||cont){end=i;started=true;prevLegend=LEGENDRE.test(l)||cont;}else break;
