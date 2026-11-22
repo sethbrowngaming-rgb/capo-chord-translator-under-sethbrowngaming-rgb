@@ -30,11 +30,27 @@
   td,th{border-bottom:1px solid var(--line);padding:4px 8px;text-align:left}
   th{color:var(--mute);font-weight:500}
   td.pass{color:var(--ok)} td.fail{color:var(--bad)}
+  .tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  @media(max-width:700px){.tiles{grid-template-columns:1fr}}
+  .tile{display:block;position:relative;border:2px solid var(--line);border-radius:10px;padding:12px 12px 12px 42px;cursor:pointer;text-transform:none;letter-spacing:0;color:var(--text);margin:0;font-size:1rem}
+  .tile input{position:absolute;left:12px;top:14px;width:20px;height:20px;padding:0;border:0;accent-color:var(--acc)}
+  .tile .tt{display:block;font-weight:700}
+  .tile .td{display:block;color:var(--mute);font-size:.85rem;margin-top:3px;font-weight:400}
+  .tile:has(input:checked){border-color:var(--acc);background:#262b33}
 </style>
 </head>
 <body>
 <h1>Capo Chord Translator</h1>
 <p class="sub">Type chord names. Get the barre shape + frets from the capo, using your rules.</p>
+
+<div class="card" id="hdrcard">
+  <label style="font-size:1rem;color:var(--text);text-transform:none;letter-spacing:0;font-weight:700;margin-bottom:10px">Header: what should happen to the header on my notes?</label>
+  <div class="tiles">
+    <label class="tile"><input type="radio" name="hmode" value="none"><span class="tt">Keep my header</span><span class="td">Add nothing. Your own header stays exactly as you wrote it.</span></label>
+    <label class="tile"><input type="radio" name="hmode" value="std" checked><span class="tt">Add the standard header</span><span class="td">Put it on top, only if your notes have no "Capo:" line.</span></label>
+    <label class="tile"><input type="radio" name="hmode" value="full"><span class="tt">Add the full dictionary header</span><span class="td">The long version with every symbol explained. Only if there is no "Capo:" line.</span></label>
+  </div>
+</div>
 
 <div class="card">
   <div class="grid">
@@ -53,8 +69,6 @@ PWC(B/8)</textarea>
   </div>
   <div class="row" style="margin-top:12px">
     <div><label for="capo">Capo (adds to every chord's frets)</label><input type="number" id="capo" min="0" max="20" placeholder="—"></div>
-    <label style="margin:0;text-transform:none;letter-spacing:0;display:flex;gap:6px;align-items:center"><input type="checkbox" id="hdr" checked style="width:auto"> Add a header if my text has none</label>
-    <div><label for="hmode">Header type</label><select id="hmode" style="background:#0f1114;color:var(--text);border:1px solid var(--line);border-radius:8px;padding:10px;font:15px system-ui"><option value="std">Standard (default)</option><option value="full">Full dictionary</option></select></div>
     <label style="margin:0;text-transform:none;letter-spacing:0;display:flex;gap:6px;align-items:center"><input type="checkbox" id="autocopy" checked style="width:auto"> Auto-copy when I paste</label>
     <label style="margin:0;text-transform:none;letter-spacing:0;display:flex;gap:6px;align-items:center"><input type="checkbox" id="boldcopy" checked style="width:auto"> Paste as bold (Google Keep)</label>
     <button id="pastebtn">Paste, translate &amp; copy</button>
@@ -284,9 +298,12 @@ function render(){
   const cm=input.match(/^\s*Capo:\s*(\d+)/im);
   let info='';
   if(cm){capo=parseInt(cm[1],10);info='Capo '+capo+' read from the text.';}
-  else if(document.getElementById('hdr').checked){
-    const full=document.getElementById('hmode').value==='full';
-    input=(full?HEADER_FULL:HEADER)(capo===null?0:capo)+'\n\n'+input;
+  else{
+    const hm=(document.querySelector('input[name=hmode]:checked')||{}).value||'std';
+    if(hm!=='none'){
+      input=(hm==='full'?HEADER_FULL:HEADER)(capo===null?0:capo)+'\n\n'+input;
+      info=(hm==='full'?'Full dictionary':'Standard')+' header added. Pick "Keep my header" above to stop this.';
+    }
   }
   input=input.replace(/\(?\b([A-Ga-g][#b]?)\s+minor(?![A-Za-z])\)?/gi,(m,n)=>n[0].toUpperCase()+n.slice(1)+'m'); // E MINOR -> Em
   const rows=translate(input,map,capo);
@@ -316,7 +333,7 @@ function runTests(){
     return `<tr><td>${k}</td><td>${v.replace('+','')}</td><td>${esc(g)}</td><td class="${ok?'pass':'fail'}">${ok?'PASS':'FAIL'}</td></tr>`;
   }).join('');
 }
-['inp','rules','capo','hdr','hmode'].forEach(id=>document.getElementById(id).addEventListener('input',render));
+['inp','rules','capo'].forEach(id=>document.getElementById(id).addEventListener('input',render));
 document.getElementById('runtests').onclick=runTests;
 async function copyOut(msg){
   const st=document.getElementById('status');
@@ -348,6 +365,8 @@ document.getElementById('inp').addEventListener('paste',()=>{
   if(!document.getElementById('autocopy').checked)return;
   setTimeout(()=>{render();copyOut('Translated and copied.');},0);
 });
+document.querySelectorAll('input[name=hmode]').forEach(r=>r.addEventListener('change',()=>{try{localStorage.setItem('hmode',r.value)}catch(e){}render();}));
+try{const v=localStorage.getItem('hmode');const el=v&&document.querySelector('input[name=hmode][value="'+v+'"]');if(el)el.checked=true;}catch(e){}
 render();runTests();renderShapes();
 </script>
 </body>

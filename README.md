@@ -162,6 +162,16 @@ These four barre shapes, plus PWC, are the only chords in this system. A custom 
 
 PWC (power chord) diagram coming soon.
 
+## Header options
+
+At the top of the page there are three large options for what happens to the header:
+
+- **Keep my header:** nothing is added. Your own header stays exactly as you wrote it. Use this if you have your own header.
+- **Add the standard header:** (default) put the standard header on top, only if your notes have no `Capo:` line.
+- **Add the full dictionary header:** the long version, only if your notes have no `Capo:` line.
+
+The page remembers your choice in your browser. If your notes already have a `Capo:` line, no header is added whichever option is picked.
+
 ## Quick use
 
 1. Copy your note.
