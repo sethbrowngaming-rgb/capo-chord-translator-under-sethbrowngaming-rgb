@@ -344,7 +344,9 @@ function render(){
   input=input.replace(/\(?\b([A-Ga-g][#b]?)\s+minor(?![A-Za-z])\)?/gi,(m,n)=>n[0].toUpperCase()+n.slice(1)+'m'); // E MINOR -> Em
   const rows=translate(input,map,capo);
   window._last=plain(rows).replace(/^([ \t]*Capo:[ \t]*)(?:\d+|\?)?/gim,(m,a)=>(/\s$/.test(a)?a:a+' ')+'0')
-    .replace(/^([ \t]*Capo:[ \t]*\d+)[ \t]*[,;|]?[ \t]*Gain:.*$/gim,'$1'); // cut Gain from the Capo line // capo is already added into the frets
+    .replace(/^([ \t]*Capo:[ \t]*\d+)[ \t]*[,;|]?[ \t]*Gain:.*$/gim,'$1') // cut Gain from the Capo line
+    .replace(/^([ \t]*Capo:[ \t]*\d+)[ \t]*[,;|]?[ \t]*Pedal:.*$/gim,'$1') // cut Pedal from the Capo line
+    .replace(/^[ \t]*Pedal:.*(?:\r?\n|$)/gim,''); // cut the Pedal line // capo is already added into the frets
   const ot=document.getElementById('outText');ot.value=window._last;ot.style.height='auto';ot.style.height=Math.min(ot.scrollHeight+4,600)+'px';
   let bad=0;
   document.getElementById('out').innerHTML=rows.map(r=>{
