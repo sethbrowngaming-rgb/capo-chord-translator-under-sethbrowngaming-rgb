@@ -168,13 +168,13 @@ PWC (power chord) diagram coming soon.
 
 At the top of the page there are three large options for what happens to the header:
 
-- **Keep my header:** nothing is added. Your own header stays exactly as you wrote it. Use this if you have your own header.
-- **Add the standard header:** (default) put the standard header on top, only if your notes have no `Capo:` line.
-- **Add the full dictionary header:** the long version, only if your notes have no `Capo:` line.
+- **Keep my header:** nothing is added or removed. Your own header stays as you wrote it. Only the capo is set to 0 in the result (see "Capo line in the result").
+- **Use the standard header:** (default) any header in your notes is replaced with the standard header, and everything that isn't part of it (extra lines like `Gain:`, `Mid:`, `Pedal:`, extra legend lines) is cut. Your **capo, tuning and `Reverb/Slowed/Live` line are kept**. Your notes below the header are not touched. If your notes have no header, the standard header is added on top.
+- **Use the full dictionary header:** same as above, with the long header that explains every symbol.
 
-The page also recognizes a header that is already there. If your notes start with lines like `Title:`, `Tuning:`, `Artist:`, `Key:`, a legend such as `1=Top String`, or a row of dashes before the first line of chords, it counts as your header and no header is added, even when one of the "Add" options is selected. The status line under the result says so.
+A header is the block of lines at the top of your notes: `Capo:`, `Tuning:`, `Gain:` and similar lines, legend lines like `PWC=Power Chord`, rows of dashes, and any continuation line under a legend line. It ends at the first line that isn't one of those (for example `PIANO INTRO` or a line of chords). `Capo:` is read even when it sits on the same line as something else, like `(String / Note) Capo: 0`. A tuning of `Stand` or `Standard` is written as `STAND`.
 
-The page remembers your choice in your browser. If your notes already have a `Capo:` line, no header is added whichever option is picked.
+The page remembers your choice in your browser.
 
 ## Repeated header
 

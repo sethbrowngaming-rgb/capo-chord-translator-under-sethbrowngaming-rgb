@@ -46,9 +46,9 @@
 <div class="card" id="hdrcard">
   <label style="font-size:1rem;color:var(--text);text-transform:none;letter-spacing:0;font-weight:700;margin-bottom:10px">Header: what should happen to the header on my notes?</label>
   <div class="tiles">
-    <label class="tile"><input type="radio" name="hmode" value="none"><span class="tt">Keep my header</span><span class="td">Add nothing. Your own header stays exactly as you wrote it.</span></label>
-    <label class="tile"><input type="radio" name="hmode" value="std" checked><span class="tt">Add the standard header</span><span class="td">Put it on top, only if your notes have no "Capo:" line.</span></label>
-    <label class="tile"><input type="radio" name="hmode" value="full"><span class="tt">Add the full dictionary header</span><span class="td">The long version with every symbol explained. Only if there is no "Capo:" line.</span></label>
+    <label class="tile"><input type="radio" name="hmode" value="none"><span class="tt">Keep my header</span><span class="td">Add nothing. Your own header stays as you wrote it (only the capo is set to 0).</span></label>
+    <label class="tile"><input type="radio" name="hmode" value="std" checked><span class="tt">Use the standard header</span><span class="td">Replaces any header in your notes with the standard one. Your capo, tuning and reverb line are kept. Added if there is none.</span></label>
+    <label class="tile"><input type="radio" name="hmode" value="full"><span class="tt">Use the full dictionary header</span><span class="td">Same, with the long version that explains every symbol.</span></label>
   </div>
 </div>
 
@@ -317,6 +317,30 @@ function dedupeBlocks(text){
   }
   return {text:lines.join('\n'),changed};
 }
+// ---- find and rebuild the header ----
+const KNOWNKEY=/\b(?:capo|tuning|gain|pedal|title|song|artist|key|bpm|tempo|strum|strumming|time|by|author|source)\s*:/i;
+const SECTIONW=/^\s*(?:verse|versus|chorus|intro|bridge|solo|outro|pre-?chorus|trans|piano|breakdown)\b/i;
+const LEGENDRE=/^\s*[^\s=]{1,6}\s*=\s*\S/;
+// returns the index of the last header line at the top of the notes, or -1 if there is no header
+function findHeaderEnd(lines){
+  let end=-1,prevLegend=false,started=false;
+  for(let i=0;i<Math.min(lines.length,80);i++){
+    const l=lines[i];
+    if(!l.trim()) continue;
+    const strong=HDRLINE.test(l)||KNOWNKEY.test(l)||/^\s*Reverb\/Slowed/i.test(l);
+    const generic=started&&/^\s*[A-Za-z][A-Za-z ]{0,19}:\s*\S/.test(l)&&!SECTIONW.test(l);
+    const cont=started&&prevLegend&&/^\s*[a-z][^=0-9\/]*$/.test(l); // e.g. "and hit with picking hand"
+    if(strong||generic||cont){end=i;started=true;prevLegend=LEGENDRE.test(l)||cont;}else break;
+  }
+  return end;
+}
+function buildHeader(kind,c,v,withSkeleton){
+  let h=(kind==='full'?HEADER_FULL:HEADER)(c);
+  if(kind==='full'&&!withSkeleton) h=h.split('\nThe Whole Song')[0];
+  if(v&&v.tuning) h=h.replace(/^Tuning:.*$/m,'Tuning: '+v.tuning);
+  if(v&&v.reverb) h=h.replace(/^(Reverb\/Slowed(?:\/Live)?=).*$/m,(m,a)=>a+v.reverb);
+  return h;
+}
 function render(){
   const {map,errs}=parseRules(document.getElementById('rules').value);
   const rm=document.getElementById('rulemsg');
@@ -326,27 +350,38 @@ function render(){
   let capo=capoRaw===''?null:parseInt(capoRaw,10);
   let input=document.getElementById('inp').value;
   const dd=dedupeBlocks(input);input=dd.text;
-  const cm=input.match(/^[ \t]*Capo:[ \t]*(\d+)/im);
+  const cm=input.match(/\bCapo:[ \t]*(\d+)/i);
   let info='';
   if(cm){capo=parseInt(cm[1],10);info='Capo '+capo+' read from the text.';}
-  else{
-    const hm=(document.querySelector('input[name=hmode]:checked')||{}).value||'std';
-    if(hm!=='none'){
-      if(hasHeader(input,map)){
-        info='Your header was recognized, so no header was added.';
-      }else{
-        input=(hm==='full'?HEADER_FULL:HEADER)(capo===null?0:capo)+'\n\n'+input;
-        info=(hm==='full'?'Full dictionary':'Standard')+' header added. Pick "Keep my header" above to stop this.';
-      }
+  const hm=(document.querySelector('input[name=hmode]:checked')||{}).value||'std';
+  if(hm!=='none'){
+    const lines=input.split(/\r?\n/);
+    const end=findHeaderEnd(lines);
+    const c=capo===null?0:capo;
+    if(end>=0){
+      const h=lines.slice(0,end+1).join('\n');
+      const t=(h.match(/\bTuning:[ \t]*([^\n]*)/i)||[])[1];
+      const r=(h.match(/^[ \t]*Reverb\/Slowed(?:\/Live)?[ \t]*=[ \t]*([^\n]*)/im)||[])[1];
+      const tuning=t&&t.trim()&&t.trim()!=='?'?(/^(?:stand|standard|std)\.?$/i.test(t.trim())?'STAND':t.trim()):'';
+      const reverb=r&&r.trim()?r.trim():'';
+      input=buildHeader(hm,c,{tuning,reverb},false)+'\n'+lines.slice(end+1).join('\n');
+      info=(info?info+' ':'')+'Your header was replaced with the '+(hm==='full'?'full dictionary':'standard')+' header (your capo and tuning were kept). Pick "Keep my header" above to leave it as written.';
+    }else{
+      input=buildHeader(hm,c,null,true)+'\n\n'+input;
+      info=(hm==='full'?'Full dictionary':'Standard')+' header added. Pick "Keep my header" above to stop this.';
     }
   }
   if(dd.changed) info='Repeated header found, so only one copy was kept. '+info;
   input=input.replace(/\(?\b([A-Ga-g][#b]?)\s+minor(?![A-Za-z])\)?/gi,(m,n)=>n[0].toUpperCase()+n.slice(1)+'m'); // E MINOR -> Em
   const rows=translate(input,map,capo);
-  window._last=plain(rows).replace(/^([ \t]*Capo:[ \t]*)(?:\d+|\?)?/gim,(m,a)=>(/\s$/.test(a)?a:a+' ')+'0')
-    .replace(/^([ \t]*Capo:[ \t]*\d+)[ \t]*[,;|]?[ \t]*Gain:.*$/gim,'$1') // cut Gain from the Capo line
-    .replace(/^([ \t]*Capo:[ \t]*\d+)[ \t]*[,;|]?[ \t]*Pedal:.*$/gim,'$1') // cut Pedal from the Capo line
-    .replace(/^[ \t]*Pedal:.*(?:\r?\n|$)/gim,''); // cut the Pedal line // capo is already added into the frets
+  let outTxt=plain(rows).replace(/(\bCapo:[ \t]*)(?:\d+|\?)?/gi,(m,a)=>(/\s$/.test(a)?a:a+' ')+'0'); // capo is already added into the frets
+  if(hm!=='none'){
+    outTxt=outTxt
+      .replace(/^([ \t]*Capo:[ \t]*\d+)[ \t]*[,;|]?[ \t]*Gain:.*$/gim,'$1') // cut Gain from the Capo line
+      .replace(/^([ \t]*Capo:[ \t]*\d+)[ \t]*[,;|]?[ \t]*Pedal:.*$/gim,'$1') // cut Pedal from the Capo line
+      .replace(/^[ \t]*Pedal:.*(?:\r?\n|$)/gim,''); // cut the Pedal line
+  }
+  window._last=outTxt;
   const ot=document.getElementById('outText');ot.value=window._last;ot.style.height='auto';ot.style.height=Math.min(ot.scrollHeight+4,600)+'px';
   let bad=0;
   document.getElementById('out').innerHTML=rows.map(r=>{
