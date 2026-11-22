@@ -298,6 +298,25 @@ function hasHeader(text,map){
   }
   return false;
 }
+// The same header pasted twice in a row (or any repeated header block): keep one copy
+function dedupeBlocks(text){
+  const lines=text.split(/\r?\n/);let changed=false;
+  const eq=(a,b)=>a.trimEnd()===b.trimEnd();
+  for(let guard=0;guard<10;guard++){
+    let found=false;const n=lines.length;
+    for(let k=Math.min(40,Math.floor(n/2));k>=3&&!found;k--){
+      for(let i=0;i+k<=n&&!found;i++){
+        const blk=lines.slice(i,i+k);
+        if(!blk.some(l=>HDRLINE.test(l))||blk.filter(l=>l.trim()).length<3) continue;
+        let j=i+k;while(j<n&&!lines[j].trim())j++;
+        if(j+k>n) continue;
+        if(blk.every((l,t)=>eq(l,lines[j+t]))){lines.splice(i+k,j+k-(i+k));found=true;changed=true;}
+      }
+    }
+    if(!found)break;
+  }
+  return {text:lines.join('\n'),changed};
+}
 function render(){
   const {map,errs}=parseRules(document.getElementById('rules').value);
   const rm=document.getElementById('rulemsg');
@@ -306,7 +325,8 @@ function render(){
   const capoRaw=document.getElementById('capo').value;
   let capo=capoRaw===''?null:parseInt(capoRaw,10);
   let input=document.getElementById('inp').value;
-  const cm=input.match(/^\s*Capo:\s*(\d+)/im);
+  const dd=dedupeBlocks(input);input=dd.text;
+  const cm=input.match(/^[ \t]*Capo:[ \t]*(\d+)/im);
   let info='';
   if(cm){capo=parseInt(cm[1],10);info='Capo '+capo+' read from the text.';}
   else{
@@ -320,9 +340,10 @@ function render(){
       }
     }
   }
+  if(dd.changed) info='Repeated header found, so only one copy was kept. '+info;
   input=input.replace(/\(?\b([A-Ga-g][#b]?)\s+minor(?![A-Za-z])\)?/gi,(m,n)=>n[0].toUpperCase()+n.slice(1)+'m'); // E MINOR -> Em
   const rows=translate(input,map,capo);
-  window._last=plain(rows).replace(/^(\s*Capo:\s*)\d+/im,(m,a)=>a+'0'); // capo is already added into the frets
+  window._last=plain(rows).replace(/^([ \t]*Capo:[ \t]*)(?:\d+|\?)?/gim,(m,a)=>(/\s$/.test(a)?a:a+' ')+'0'); // capo is already added into the frets
   const ot=document.getElementById('outText');ot.value=window._last;ot.style.height='auto';ot.style.height=Math.min(ot.scrollHeight+4,600)+'px';
   let bad=0;
   document.getElementById('out').innerHTML=rows.map(r=>{

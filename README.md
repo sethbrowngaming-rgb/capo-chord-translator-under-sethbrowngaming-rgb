@@ -61,6 +61,8 @@ A repeat marker can also be attached to a chord with an underscore. The undersco
 
 ### Capo line in the result
 
+If the `Capo:` line is blank (`Capo:`) or has a question mark (`Capo: ?`), it becomes `Capo: 0` in the result.
+
 The capo is already added into the translated frets, so the `Capo:` line in the result is changed to `Capo: 0`. Other text on that line (like `Gain: 2`) is kept. This also means you can paste a translated note back in without the capo being added twice.
 
 ### "MINOR" written out
@@ -173,6 +175,10 @@ At the top of the page there are three large options for what happens to the hea
 The page also recognizes a header that is already there. If your notes start with lines like `Title:`, `Tuning:`, `Artist:`, `Key:`, a legend such as `1=Top String`, or a row of dashes before the first line of chords, it counts as your header and no header is added, even when one of the "Add" options is selected. The status line under the result says so.
 
 The page remembers your choice in your browser. If your notes already have a `Capo:` line, no header is added whichever option is picked.
+
+## Repeated header
+
+If the same header block is pasted more than once in a row (for example a translated note pasted back in with its header on top), only one copy is kept. The status line says so. Repeated lines of chords are never removed.
 
 ## Quick use
 
