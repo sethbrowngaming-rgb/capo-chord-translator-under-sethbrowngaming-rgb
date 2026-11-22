@@ -63,7 +63,7 @@ A repeat marker can also be attached to a chord with an underscore. The undersco
 
 If the `Capo:` line is blank (`Capo:`) or has a question mark (`Capo: ?`), it becomes `Capo: 0` in the result.
 
-The capo is already added into the translated frets, so the `Capo:` line in the result is changed to `Capo: 0`. Other text on that line (like `Gain: 2`) is kept. This also means you can paste a translated note back in without the capo being added twice.
+The capo is already added into the translated frets, so the `Capo:` line in the result is changed to `Capo: 0`. If `Gain:` is written next to the capo on the same line (`Capo: 0 Gain: ?`), the gain is cut so the line is just `Capo: 0`. This also means you can paste a translated note back in without the capo being added twice.
 
 ### "MINOR" written out
 
