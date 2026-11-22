@@ -170,6 +170,8 @@ At the top of the page there are three large options for what happens to the hea
 - **Add the standard header:** (default) put the standard header on top, only if your notes have no `Capo:` line.
 - **Add the full dictionary header:** the long version, only if your notes have no `Capo:` line.
 
+The page also recognizes a header that is already there. If your notes start with lines like `Title:`, `Tuning:`, `Artist:`, `Key:`, a legend such as `1=Top String`, or a row of dashes before the first line of chords, it counts as your header and no header is added, even when one of the "Add" options is selected. The status line under the result says so.
+
 The page remembers your choice in your browser. If your notes already have a `Capo:` line, no header is added whichever option is picked.
 
 ## Quick use
